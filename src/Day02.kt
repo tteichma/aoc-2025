@@ -11,18 +11,25 @@ private class Day02(val ranges: List<LongRange>) {
     }
 
     fun solvePart1(): Long {
-        val invalidIds = ranges.flatMap{range->
+        return ranges.flatMap { range ->
             range.filter {
                 val s = it.toString()
                 val length = s.length
                 length % 2 == 0 && s.take(length / 2) == s.takeLast(length / 2)
             }
-        }
-        return invalidIds.sum()
+        }.sum()
     }
 
     fun solvePart2(): Long {
-        return 0L
+        return ranges.flatMap { range ->
+            range.filter {
+                val s = it.toString()
+                (1..s.length/2).any { patternLength->
+                    val patternCount = s.length / patternLength
+                    s.length == patternLength * patternCount && s.take(patternLength ).repeat(patternCount) == s
+                }
+            }
+        }.sum()
     }
 }
 
@@ -33,7 +40,7 @@ fun main() {
         val day = Day02.fromInput(testInput)
         day.solvePart1()
     }
-    profiledCheck(0L, "Part 2 test") {
+    profiledCheck(4174379265L, "Part 2 test") {
         val day = Day02.fromInput(testInput)
         day.solvePart2()
     }
