@@ -1,16 +1,41 @@
-private class Day04(data: List<List<Boolean>>) : DataMap<Boolean>(data) {
+private class Day04Map(data: List<List<Boolean>>) : DataMap<Boolean>(data) {
+    fun getAccessiblePaperRollCoordinates() =
+        coordinates.filter { coordinate -> this[coordinate] && coordinate.getEightNeighbours { this[it] }.size < 4 }
+
     companion object {
-        fun fromInput(input: List<String>): Day04 {
-            return Day04(input.map { row -> row.map { it == '@' } })
+        fun fromInput(input: List<String>): Day04Map {
+            return Day04Map(input.map { row -> row.map { it == '@' } })
         }
+    }
+}
+
+private class Day04(val dataMap: Day04Map) {
+    companion object {
+        fun fromInput(input: List<String>) = Day04(Day04Map.fromInput(input))
     }
 
     fun solvePart1(): Long {
-        return coordinates.count { coordinate -> this[coordinate] && coordinate.getEightNeighbours { this[it] }.size < 4 }.toLong()
+        return dataMap.getAccessiblePaperRollCoordinates().size.toLong()
     }
 
     fun solvePart2(): Long {
-        return 0L
+        var numRemoves = 0L
+
+        var lastMap = dataMap
+        while (true) {
+            val removableCoordinates = lastMap.getAccessiblePaperRollCoordinates().toSet()
+            if (removableCoordinates.isEmpty()) break
+
+            numRemoves += removableCoordinates.size
+            lastMap = Day04Map(
+                lastMap.data.withIndex().map { (indX, row) ->
+                    row.withIndex().map { (indY, oldValue) ->
+                        oldValue && IntCoordinate(indX, indY) !in removableCoordinates
+                    }
+                }
+            )
+        }
+        return numRemoves
     }
 }
 
@@ -21,7 +46,7 @@ fun main() {
         val day = Day04.fromInput(testInput)
         day.solvePart1()
     }
-    profiledCheck(0L, "Part 2 test") {
+    profiledCheck(43L, "Part 2 test") {
         val day = Day04.fromInput(testInput)
         day.solvePart2()
     }
